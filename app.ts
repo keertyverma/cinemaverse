@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import config from "config";
 
+import logger from "./logger";
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -11,7 +13,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(console.log(`App listening at http://localhost:${PORT}`));
-  console.log("NODE Env = ", process.env.NODE_ENV);
-  console.log("host = ", config.get("host"));
+  logger.info(`App listening at http://localhost:${PORT}`);
+  logger.debug(`NODE Env = ${process.env.NODE_ENV}`);
+  logger.debug(`Host = ${config.get("host")}`);
 });
