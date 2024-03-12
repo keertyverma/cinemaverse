@@ -1,15 +1,27 @@
 import { Request, Response } from "express";
 import { Error } from "mongoose";
 import { StatusCodes } from "http-status-codes";
+import Joi, { ObjectSchema } from "joi";
 
 import logger from "../logger";
-import { Movie, Genre } from "../models/movie";
+import { Movie, Genre, IMovie } from "../models/movie";
 
 const getAllMovies = async (req: Request, res: Response) => {
   logger.debug(`GET Request on Route -> ${req.baseUrl}`);
 
   const movies = await Movie.find().select({ __v: 0 });
   res.status(StatusCodes.OK).send({ data: movies });
+};
+
+const validateMovie = (movie: IMovie) => {
+  const schema: ObjectSchema = Joi.object({
+    name: Joi.string().required(),
+    genres: Joi.array(),
+    releaseDate: Joi.date(),
+    posterURL: Joi.string(),
+  });
+
+  return schema.validate(movie);
 };
 
 const _createGenres = async (genres: string[]) => {
@@ -27,7 +39,15 @@ const _createGenres = async (genres: string[]) => {
 const createMovie = async (req: Request, res: Response) => {
   logger.debug(`POST Request on Route -> ${req.baseUrl}`);
 
-  // TODO: validate request body
+  // validate request body
+  const { error } = validateMovie(req.body);
+  if (error) {
+    console.log("validation error = ", error.details[0].message);
+
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .send({ errors: [{ message: error.details[0].message }] });
+  }
 
   try {
     // create movie object
