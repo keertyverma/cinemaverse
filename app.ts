@@ -1,3 +1,4 @@
+import "express-async-errors";
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 dotenv.config();
@@ -6,6 +7,7 @@ import { connect } from "mongoose";
 
 import logger from "./logger";
 import appRouter from "./routes";
+import errorHandler from "./middlewares/error-handler";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +31,9 @@ connect(`${MONGO_URI}`)
   .catch((err) => {
     logger.info(`Connection Fails for MongoDB - ${MONGO_URI} \n ${err}`);
   });
+
+// error handler middleware
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   logger.info(`App listening at http://localhost:${PORT}`);

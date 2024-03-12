@@ -7,7 +7,7 @@ export interface IGenre {
 
 export interface IMovie {
   name: string;
-  genres: IGenre[];
+  genres?: IGenre[];
   releaseDate?: Date;
   posterURL?: string;
 }

@@ -5,12 +5,19 @@ import Joi, { ObjectSchema } from "joi";
 
 import logger from "../logger";
 import { Movie, Genre, IMovie } from "../models/movie";
+import BadRequestError from "../errors/bad-request";
+import { APIResponse } from "../types/api-response";
 
 const getAllMovies = async (req: Request, res: Response) => {
   logger.debug(`GET Request on Route -> ${req.baseUrl}`);
 
   const movies = await Movie.find().select({ __v: 0 });
-  res.status(StatusCodes.OK).send({ data: movies });
+  const result: APIResponse<IMovie> = {
+    status: "success",
+    statusCode: StatusCodes.OK,
+    data: movies,
+  };
+  res.status(StatusCodes.OK).send(result);
 };
 
 const validateMovie = (movie: IMovie) => {
@@ -42,45 +49,43 @@ const createMovie = async (req: Request, res: Response) => {
   // validate request body
   const { error } = validateMovie(req.body);
   if (error) {
-    console.log("validation error = ", error.details[0].message);
+    const result: APIResponse = {
+      status: "error",
+      statusCode: StatusCodes.BAD_REQUEST,
+      error: {
+        code: "BAD_REQUEST",
+        message: "Invalid input data",
+        details: error.details[0].message,
+      },
+    };
 
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .send({ errors: [{ message: error.details[0].message }] });
+    logger.error(`Input Validation Error! \n ${error.details[0].message}`);
+    throw new BadRequestError(error.details[0].message);
   }
 
-  try {
-    // create movie object
-    const { name, genres, releaseDate, posterURL } = req.body;
-    const movie = new Movie({
-      name,
-      posterURL,
-      releaseDate,
-    });
+  // create movie object
+  const { name, genres, releaseDate, posterURL } = req.body;
+  const movie = new Movie({
+    name,
+    posterURL,
+    releaseDate,
+  });
 
-    // create genre
-    if (genres) {
-      const movieGenres = await _createGenres(genres);
-      movie.genres = movieGenres ?? [];
-    }
-
-    // store movie in db
-    await movie.save();
-
-    res.status(StatusCodes.CREATED).send({ data: movie });
-  } catch (exception) {
-    if (exception instanceof Error.ValidationError) {
-      const errors = [];
-      for (let field in exception.errors) {
-        errors.push({ message: exception.errors[field].message });
-      }
-      return res.status(StatusCodes.BAD_REQUEST).send({ errors });
-    }
-
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send({ errors: [{ message: "Something went wrong!" }] });
+  // create genre
+  if (genres) {
+    const movieGenres = await _createGenres(genres);
+    movie.genres = movieGenres ?? [];
   }
+
+  // store movie in db
+  await movie.save();
+
+  const result: APIResponse<IMovie> = {
+    status: "success",
+    statusCode: StatusCodes.CREATED,
+    data: movie,
+  };
+  res.status(StatusCodes.CREATED).send(result);
 };
 
 export { getAllMovies, createMovie };
