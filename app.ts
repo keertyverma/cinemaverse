@@ -8,6 +8,7 @@ import { connect } from "mongoose";
 import logger from "./logger";
 import appRouter from "./routes";
 import errorHandler from "./middlewares/error-handler";
+import routeNotFoundHandler from "./middlewares/route-not-found";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ connect(`${MONGO_URI}`)
   });
 
 // error handler middleware
+app.use(routeNotFoundHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
