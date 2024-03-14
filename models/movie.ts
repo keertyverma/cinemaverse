@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import * as _ from "lodash";
 
 // Create an interface representing a document in MongoDB
 export interface IGenre {
@@ -24,10 +25,23 @@ const movieSchema = new Schema<IMovie>({
   name: {
     type: String,
     required: [true, "'name' field is required."],
+    unique: true,
+    get: (v: string) => _.capitalize(v),
+    set: (v: string) => _.capitalize(v),
+    trim: true,
   },
-  genres: [genreSchema],
+  genres: [
+    new Schema({
+      name: {
+        type: String,
+        get: (v: string) => _.capitalize(v),
+        set: (v: string) => _.capitalize(v),
+        trim: true,
+      },
+    }),
+  ],
   releaseDate: Date,
-  posterURL: String,
+  posterURL: { type: String, trim: true },
 });
 
 // Create a Model

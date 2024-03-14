@@ -4,6 +4,7 @@ import { Error as MongooseError } from "mongoose";
 
 import { APIResponse, IErrorCodeMessageMap } from "../types/api-response";
 import CustomAPIError from "../errors/custom-api";
+import logger from "../logger";
 
 const errorHandler = (
   err: Error & CustomAPIError,
@@ -11,6 +12,8 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  logger.debug(err);
+
   const errorCodeMessageMap: IErrorCodeMessageMap = {
     400: { code: "BAD_REQUEST", message: "Invalid input data" },
     404: {
@@ -34,11 +37,14 @@ const errorHandler = (
     customError.details = Object.values(err.errors)
       .map((error) => error.message)
       .join(", ");
-  }
-
-  if (err instanceof MongooseError.CastError) {
+  } else if (err instanceof MongooseError.CastError) {
     customError.statusCode = StatusCodes.NOT_FOUND;
     customError.details = `No resource found with id = ${err.value}`;
+  } else if ((err as any).code === 11000) {
+    customError.statusCode = StatusCodes.BAD_REQUEST;
+    customError.details = `Duplicate value entered for '${Object.keys(
+      (err as any).keyValue
+    )}' field, please choose another value`;
   }
 
   const mappedError = errorCodeMessageMap[customError.statusCode];
