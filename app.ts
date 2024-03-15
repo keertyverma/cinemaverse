@@ -5,10 +5,10 @@ dotenv.config();
 import config from "config";
 import { connect } from "mongoose";
 
-import logger from "./logger";
-import appRouter from "./routes";
-import errorHandler from "./middlewares/error-handler";
-import routeNotFoundHandler from "./middlewares/route-not-found";
+import logger from "./src/logger";
+import appRouter from "./src/routes";
+import errorHandler from "./src/middlewares/error-handler";
+import routeNotFoundHandler from "./src/middlewares/route-not-found";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

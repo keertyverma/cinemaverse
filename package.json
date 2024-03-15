@@ -2,7 +2,7 @@
   "name": "cinemaverse",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
     "dev": "nodemon app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
