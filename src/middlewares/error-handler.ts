@@ -7,7 +7,7 @@ import CustomAPIError from "../errors/custom-api";
 import logger from "../logger";
 
 const errorHandler = (
-  err: Error & CustomAPIError,
+  err: MongooseError | CustomAPIError | Error,
   req: Request,
   res: Response,
   next: NextFunction
@@ -28,11 +28,14 @@ const errorHandler = (
   };
 
   const customError = {
-    statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-    details: err.message || "Something went wrong",
+    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+    details: "Something went wrong",
   };
 
-  if (err instanceof MongooseError.ValidationError) {
+  if (err instanceof CustomAPIError) {
+    customError.statusCode = err.statusCode;
+    customError.details = err.message;
+  } else if (err instanceof MongooseError.ValidationError) {
     customError.statusCode = StatusCodes.BAD_REQUEST;
     customError.details = Object.values(err.errors)
       .map((error) => error.message)
