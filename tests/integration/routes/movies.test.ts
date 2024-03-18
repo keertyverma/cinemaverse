@@ -243,4 +243,47 @@ describe("/api/movies", () => {
       expect(responseData.name).toBe("Updated movie");
     });
   });
+
+  describe("DELETE /:id", () => {
+    it("should return BadRequest-400 if id is invalid", async () => {
+      const id = "123";
+      const res = await request(server).delete(`${endpoint}/${id}`);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        code: "BAD_REQUEST",
+        message: "Invalid input data",
+        details: `Invalid id = ${id}`,
+      });
+    });
+
+    it("should return NotFound-404 if id does not exists", async () => {
+      const id = "65f415f9fa340f3183c8a44e";
+      const res = await request(server).delete(`${endpoint}/${id}`);
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toMatchObject({
+        code: "RESOURCE_NOT_FOUND",
+        message: "The requested resource was not found.",
+        details: `Movie with id = ${id} is not found.`,
+      });
+    });
+
+    it("should delete movie by passing valid id", async () => {
+      // create a movie
+      const movie = await Movie.create({
+        name: "new movie",
+      });
+      const movieId = movie._id;
+
+      // delete movie
+      const res = await request(server).delete(`${endpoint}/${movieId}`);
+      const responseData = res.body.data;
+
+      expect(res.statusCode).toBe(200);
+      expect(responseData._id).toBe(movie.id);
+
+      // confirm if movie is deleted from db
+      const deletedMovie = await Movie.findById(movieId);
+      expect(deletedMovie).toBeNull;
+    });
+  });
 });
