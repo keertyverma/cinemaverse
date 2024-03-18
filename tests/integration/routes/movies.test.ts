@@ -141,4 +141,44 @@ describe("/api/movies", () => {
       expect(genres[0]).toMatchObject({ name: genre.name, _id: genre.id });
     });
   });
+
+  describe("GET /:id", () => {
+    it("should return BadRequest-400 if id is invalid", async () => {
+      const id = "skdksf";
+      const res = await request(server).get(`${endpoint}/${id}`);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        code: "BAD_REQUEST",
+        message: "Invalid input data",
+        details: `Invalid id = ${id}`,
+      });
+    });
+
+    it("should return NotFound-404 if id does not exists", async () => {
+      const id = "65f415f9fa340f3183c8a44e";
+      const res = await request(server).get(`${endpoint}/${id}`);
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toMatchObject({
+        code: "RESOURCE_NOT_FOUND",
+        message: "The requested resource was not found.",
+        details: `Movie with id = ${id} is not found.`,
+      });
+    });
+
+    it("should return movie by passing id", async () => {
+      // create a movie
+      const movie = await Movie.create({
+        name: "new movie",
+      });
+
+      const res = await request(server).get(`${endpoint}/${movie.id}`);
+      const responseData = res.body.data;
+
+      expect(res.statusCode).toBe(200);
+      expect(responseData._id).toBe(movie.id);
+      expect(responseData.name).toBe("New movie");
+    });
+  });
 });

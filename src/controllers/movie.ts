@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Joi, { ObjectSchema } from "joi";
+import { Types } from "mongoose";
 
 import logger from "../logger";
 import { Movie, Genre, IMovie } from "../models/movie";
@@ -18,7 +19,7 @@ const getAllMovies = async (req: Request, res: Response) => {
     statusCode: StatusCodes.OK,
     data: movies,
   };
-  res.status(StatusCodes.OK).send(result);
+  res.status(StatusCodes.OK).json(result);
 };
 
 const validateMovie = (movie: IMovie) => {
@@ -80,7 +81,29 @@ const createMovie = async (req: Request, res: Response) => {
     statusCode: StatusCodes.CREATED,
     data: movie,
   };
-  res.status(StatusCodes.CREATED).send(result);
+  res.status(StatusCodes.CREATED).json(result);
 };
 
-export { getAllMovies, createMovie };
+const getMovieById = async (req: Request, res: Response) => {
+  logger.debug(`GET by Id request on route -> ${req.baseUrl}`);
+
+  const { id } = req.params;
+  // check if id is valid
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestError(`Invalid id = ${id}`);
+  }
+
+  // get movie by id
+  const movie = await Movie.findById(id).select({ __v: 0 });
+  if (!movie) {
+    throw new NotFoundError(`Movie with id = ${id} is not found.`);
+  }
+
+  const result: APIResponse<IMovie> = {
+    status: "success",
+    statusCode: StatusCodes.OK,
+    data: movie,
+  };
+  res.status(StatusCodes.OK).json(result);
+};
+export { getAllMovies, createMovie, getMovieById };

@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getAllMovies, createMovie } from "../controllers/movie";
+import { getAllMovies, createMovie, getMovieById } from "../controllers/movie";
 
 const router = Router();
 
 router.get("/", getAllMovies);
 router.post("/", createMovie);
+router.get("/:id", getMovieById);
 
 export default router;
