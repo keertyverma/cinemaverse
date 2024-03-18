@@ -106,4 +106,50 @@ const getMovieById = async (req: Request, res: Response) => {
   };
   res.status(StatusCodes.OK).json(result);
 };
-export { getAllMovies, createMovie, getMovieById };
+
+const validateUpdateMovie = (movie: IMovie) => {
+  const schema: ObjectSchema = Joi.object({
+    name: Joi.string(),
+    genreIds: Joi.array().items(mongoIdValidator.mongoId()),
+    releaseDate: Joi.date(),
+    posterURL: Joi.string(),
+  });
+
+  return schema.validate(movie);
+};
+
+const updateMovieById = async (req: Request, res: Response) => {
+  logger.debug(`PATCH movie request on route -> ${req.baseUrl}`);
+
+  const { id } = req.params;
+  // check if id is valid
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestError(`Invalid id = ${id}`);
+  }
+
+  // validate request body
+  const { error } = validateUpdateMovie(req.body);
+  if (error) {
+    logger.error(`Input Validation Error! \n ${error.details[0].message}`);
+    throw new BadRequestError(error.details[0].message);
+  }
+
+  // check if movie exists and then update the movie
+  const updatedMovie = await Movie.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+  if (!updatedMovie) {
+    throw new NotFoundError(`Movie with id = ${id} is not found.`);
+  }
+
+  //TODO: update genres
+
+  const result: APIResponse<IMovie> = {
+    status: "success",
+    statusCode: StatusCodes.OK,
+    data: updatedMovie,
+  };
+  res.status(200).json(result);
+};
+
+export { getAllMovies, createMovie, getMovieById, updateMovieById };

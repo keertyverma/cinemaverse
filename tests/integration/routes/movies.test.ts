@@ -181,4 +181,66 @@ describe("/api/movies", () => {
       expect(responseData.name).toBe("New movie");
     });
   });
+
+  describe("PATCH /:id", () => {
+    it("should return BadRequest-400 if id is invalid", async () => {
+      const id = "123";
+      const res = await request(server).patch(`${endpoint}/${id}`);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        code: "BAD_REQUEST",
+        message: "Invalid input data",
+        details: `Invalid id = ${id}`,
+      });
+    });
+
+    it("should return NotFound-404 if id does not exists", async () => {
+      const id = "65f415f9fa340f3183c8a44e";
+      const res = await request(server).patch(`${endpoint}/${id}`);
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toMatchObject({
+        code: "RESOURCE_NOT_FOUND",
+        message: "The requested resource was not found.",
+        details: `Movie with id = ${id} is not found.`,
+      });
+    });
+
+    it("should return BadRequest-400 if request body is invalid", async () => {
+      const id = "65f415f9fa340f3183c8a44e";
+      const toUpdate = {
+        moviename: "new movie",
+      };
+
+      const res = await request(server)
+        .patch(`${endpoint}/${id}`)
+        .send(toUpdate);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({
+        code: "BAD_REQUEST",
+        message: "Invalid input data",
+        details: '"moviename" is not allowed',
+      });
+    });
+
+    it("should update movie by passing valid id", async () => {
+      // create a movie
+      const movie = await Movie.create({
+        name: "new movie",
+      });
+
+      // update movie
+      const toUpdate = { name: "updated movie" };
+      const res = await request(server)
+        .patch(`${endpoint}/${movie.id}`)
+        .send(toUpdate);
+
+      const responseData = res.body.data;
+      expect(res.statusCode).toBe(200);
+      expect(responseData._id).toBe(movie.id);
+      expect(responseData.name).toBe("Updated movie");
+    });
+  });
 });
