@@ -4,7 +4,7 @@ import Joi, { ObjectSchema } from "joi";
 import { Types } from "mongoose";
 
 import logger from "../logger";
-import { Movie, Genre, IMovie } from "../models/movie";
+import { Movie, IMovie, Genre } from "../models";
 import BadRequestError from "../errors/bad-request";
 import { APIResponse } from "../types/api-response";
 import NotFoundError from "../errors/not-found";

@@ -3,7 +3,7 @@ import { Types, disconnect } from "mongoose";
 import http from "http";
 
 import app from "../../../app";
-import { Genre, IMovie, Movie } from "../../../src/models/movie";
+import { Genre, IMovie, Movie } from "../../../src/models";
 import config from "config";
 
 let server: http.Server;
@@ -23,6 +23,7 @@ describe("/api/movies", () => {
     server.close();
     // db cleanup
     await Movie.deleteMany({});
+    await Genre.deleteMany({});
   });
 
   describe("GET /", () => {
