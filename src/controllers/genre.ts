@@ -6,6 +6,8 @@ import { Genre, IGenre } from "../models";
 import logger from "../logger";
 import Joi, { ObjectSchema } from "joi";
 import BadRequestError from "../errors/bad-request";
+import { Types } from "mongoose";
+import NotFoundError from "../errors/not-found";
 
 const getAllGenre = async (req: Request, res: Response) => {
   logger.debug(`GET Request on Route -> ${req.baseUrl}`);
@@ -55,4 +57,28 @@ const createGenre = async (req: Request, res: Response) => {
   };
   res.status(result.statusCode).json(result);
 };
-export { getAllGenre, createGenre };
+
+const getGenreById = async (req: Request, res: Response) => {
+  logger.debug(`GET by Id request on route -> ${req.baseUrl}`);
+
+  const { id } = req.params;
+  // check if id is valid
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestError(`Invalid id = ${id}`);
+  }
+
+  // get genre by id
+  const genre = await Genre.findById(id).select({ __v: 0 });
+
+  if (!genre) {
+    throw new NotFoundError(`Genre with id = ${id} is not found.`);
+  }
+  const result: APIResponse<IGenre> = {
+    status: "success",
+    statusCode: StatusCodes.OK,
+    data: genre,
+  };
+  res.status(result.statusCode).json(result);
+};
+
+export { getAllGenre, createGenre, getGenreById };
