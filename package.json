@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
+    "start": "ts-node app.ts",
     "dev": "nodemon app.ts",
     "test": "jest --verbose --coverage",
     "test:unit": "jest --testPathPattern=tests/unit --verbose",

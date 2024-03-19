@@ -1,3 +1,4 @@
 {
-  "appName": "cinemaverse"
+  "appName": "cinemaverse",
+  "mongoURI": "mongodb://localhost:27017/cinemaverse-prod"
 }
