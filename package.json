@@ -1,7 +1,7 @@
 {
   "name": "cinemaverse",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cinemaverse API manages movies, genres",
   "main": "app.ts",
   "scripts": {
     "start": "ts-node app.ts",
@@ -11,7 +11,7 @@
     "test:integration": "jest --testPathPattern=tests/integration --verbose --detectOpenHandles"
   },
   "keywords": [],
-  "author": "",
+  "author": "Keerty Verma",
   "license": "ISC",
   "devDependencies": {
     "@types/config": "^3.3.3",
