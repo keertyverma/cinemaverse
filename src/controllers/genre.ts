@@ -121,4 +121,33 @@ const updateGenreById = async (req: Request, res: Response) => {
   res.status(200).json(result);
 };
 
-export { getAllGenre, createGenre, getGenreById, updateGenreById };
+const deleteGenreById = async (req: Request, res: Response) => {
+  logger.debug(`DELETE genre request on route -> ${req.baseUrl}`);
+
+  const { id } = req.params;
+  // check if id is valid
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestError(`Invalid id = ${id}`);
+  }
+
+  const deletedGenre = await Genre.findByIdAndDelete(id);
+
+  if (!deletedGenre) {
+    throw new NotFoundError(`Genre with id = ${id} is not found.`);
+  }
+
+  const result: APIResponse<IGenre> = {
+    status: "success",
+    statusCode: StatusCodes.OK,
+    data: deletedGenre,
+  };
+  res.status(result.statusCode).json(result);
+};
+
+export {
+  getAllGenre,
+  createGenre,
+  getGenreById,
+  updateGenreById,
+  deleteGenreById,
+};
